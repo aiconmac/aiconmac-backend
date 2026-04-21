@@ -14,6 +14,7 @@
     "prisma:migrate": "npx prisma migrate dev",
     "db:init": "npm run prisma:push && npm run prisma:generate",
     "db:test": "node scripts/init-db.js",
+    "create-admin": "node scripts/create-admin.js",
     "seed": "node prisma/seed.js"
   },
   "keywords": [],
