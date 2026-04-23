@@ -15,9 +15,9 @@ if (!email || !password) {
 const hash = await bcrypt.hash(password, 10);
 const user = await prisma.user.upsert({
   where: { email },
-  update: {},
+  update: { password: hash, name, role: 'ADMIN' },
   create: { email, password: hash, name, role: 'ADMIN' },
 });
 
-console.log(`Admin user ready: ${user.email} (id: ${user.id})`);
+console.log(`Admin user ready: ${user.email} (id: ${user.id}) — password updated.`);
 await prisma.$disconnect();
