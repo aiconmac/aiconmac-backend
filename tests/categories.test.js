@@ -69,6 +69,31 @@ test('PUT updates name_ar and sortOrder; unknown id is 404', async () => {
   assert.equal(missing.status, 404);
 });
 
+test('PUT with only name and slug keeps sortOrder and name_ar', async () => {
+  await seed();
+  const { id } = await prisma.category.findUnique({ where: { slug: 'masterplan' } });
+  const { status } = await json(server.base, `/categories/${id}`, {
+    method: 'PUT', token, body: { slug: 'masterplan', name: 'Master Plan' },
+  });
+  assert.equal(status, 200);
+  const row = await prisma.category.findUnique({ where: { id } });
+  assert.equal(row.name, 'Master Plan');
+  assert.equal(row.sortOrder, 2);
+  assert.equal(row.name_ar, 'مخطط رئيسي');
+});
+
+test('PUT rejects a bad sortOrder with 400', async () => {
+  await seed();
+  const { id } = await prisma.category.findUnique({ where: { slug: 'masterplan' } });
+  const { status } = await json(server.base, `/categories/${id}`, {
+    method: 'PUT', token, body: { sortOrder: '-1' },
+  });
+  assert.equal(status, 400);
+  const row = await prisma.category.findUnique({ where: { id } });
+  assert.equal(row.sortOrder, 2);
+  assert.equal(row.name, 'Masterplan');
+});
+
 test('DELETE removes an unused category and refuses one still in use', async () => {
   await seed();
   const unused = await prisma.category.findUnique({ where: { slug: 'masterplan' } });
