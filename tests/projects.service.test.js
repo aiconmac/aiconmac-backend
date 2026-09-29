@@ -76,6 +76,20 @@ test('updateProject clears leadTimeDays with an empty string and leaves omitted 
   assert.deepEqual(updated.category, { slug: 'architectural', name: 'Architectural', name_ar: 'معماري' });
 });
 
+test('updateProject stores blank translations as null', async () => {
+  const created = await projectService.createProject(
+    { ...base('marina'), description_ar: 'نص' },
+    [file('marina-1')],
+  );
+  await projectService.updateProject(
+    created.id,
+    { ...base('marina'), description_ar: '', existingImageIds: [created.images[0].id] },
+    [],
+  );
+  const stored = await prisma.project.findUniqueOrThrow({ where: { id: created.id } });
+  assert.equal(stored.description_ar, null);
+});
+
 test('updateProject on an unknown id rejects with P2025', async () => {
   await assert.rejects(
     projectService.updateProject('00000000-0000-0000-0000-000000000000', base('ghost'), []),

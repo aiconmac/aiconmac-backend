@@ -63,9 +63,15 @@ export const createProject = async (projectData, imageFiles = []) => {
 
   const project = await prisma.project.create({
     data: {
-      title, title_ar, title_ru,
-      description, description_ar, description_ru,
-      badge, badge_ar, badge_ru,
+      title,
+      title_ar: optionalText(title_ar),
+      title_ru: optionalText(title_ru),
+      description,
+      description_ar: optionalText(description_ar),
+      description_ru: optionalText(description_ru),
+      badge,
+      badge_ar: optionalText(badge_ar),
+      badge_ru: optionalText(badge_ru),
       slug,
       categoryId,
       scale: optionalText(scale) ?? null,
@@ -102,9 +108,15 @@ export const updateProject = async (id, projectData, imageFiles = []) => {
   const project = await prisma.project.update({
     where: { id },
     data: {
-      title, title_ar, title_ru,
-      description, description_ar, description_ru,
-      badge, badge_ar, badge_ru,
+      title,
+      title_ar: optionalText(title_ar),
+      title_ru: optionalText(title_ru),
+      description,
+      description_ar: optionalText(description_ar),
+      description_ru: optionalText(description_ru),
+      badge,
+      badge_ar: optionalText(badge_ar),
+      badge_ru: optionalText(badge_ru),
       slug,
       ...(categoryId !== undefined && { categoryId }),
       ...(scale !== undefined && { scale: optionalText(scale) }),
