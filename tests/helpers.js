@@ -14,6 +14,7 @@ export const startServer = () => new Promise((resolve) => {
 
 export const resetDb = async () => {
   await prisma.project.deleteMany();
+  await prisma.category.deleteMany();
   await prisma.user.deleteMany();
 };
 

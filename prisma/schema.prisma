@@ -32,15 +32,13 @@ model Project {
   title       String
   description String
   badge       String    // e.g., Residential, Commercial, Cultural
-  category    String?   // legacy free text; replaced by categoryId, dropped in the next schema change
 
-  categoryId  String?
-  scale       String?
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  scale       String?   // e.g. "1:75"
   leadTimeDays Int?
   clientName  String?
 
-  category_ar String?
-  category_ru String?
   title_ar    String?
   title_ru    String?
   description_ar String?
@@ -53,7 +51,7 @@ model Project {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   isPinned    Boolean   @default(false)
-  pinOrder    Int       @default(0)
+  sortOrder   Int       @default(0) @map("pinOrder")
 }
 
 // Image Model for projects (each project can have multiple images)
@@ -71,11 +69,12 @@ model Image {
 
 // Category list owned by the backend; drives Work filters and the Contact form
 model Category {
-  id        String  @id @default(uuid())
-  slug      String  @unique
+  id        String    @id @default(uuid())
+  slug      String    @unique
   name      String
   name_ar   String?
-  sortOrder Int     @default(0)
+  sortOrder Int       @default(0)
+  projects  Project[]
 }
 
 // Testimonial Model
