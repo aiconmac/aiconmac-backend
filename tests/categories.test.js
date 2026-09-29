@@ -85,10 +85,11 @@ test('PUT with only name and slug keeps sortOrder and name_ar', async () => {
 test('PUT rejects a bad sortOrder with 400', async () => {
   await seed();
   const { id } = await prisma.category.findUnique({ where: { slug: 'masterplan' } });
-  const { status } = await json(server.base, `/categories/${id}`, {
-    method: 'PUT', token, body: { sortOrder: '-1' },
+  const { status, body } = await json(server.base, `/categories/${id}`, {
+    method: 'PUT', token, body: { slug: 'masterplan', name: 'Masterplan', sortOrder: '-1' },
   });
   assert.equal(status, 400);
+  assert.match(JSON.stringify(body), /sortOrder/);
   const row = await prisma.category.findUnique({ where: { id } });
   assert.equal(row.sortOrder, 2);
   assert.equal(row.name, 'Masterplan');
