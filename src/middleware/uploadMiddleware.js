@@ -47,3 +47,23 @@ export const uploadSingleImage = uploadImages.single('image');
 export const uploadMultipleImages = uploadImages.array('images', 10);
 export const uploadLogo = uploadImages.single('logo');
 export const uploadResume = uploadResumeFile.single('resume');
+
+// Configure Multer for contact-form drawings (CAD files have no stable MIME type, so filter by extension)
+const drawingStorage = new CloudinaryStorage({
+  folder: 'aiconmac_drawings',
+  resource_type: 'raw'
+});
+
+const uploadDrawingFiles = multer({
+  storage: drawingStorage,
+  limits: { fileSize: 10 * 1024 * 1024, files: 5 }, // 10MB each, 5 files
+  fileFilter: (req, file, cb) => {
+    if (/\.(pdf|dwg|dxf|jpe?g|png)$/i.test(file.originalname)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, DWG, DXF, JPG and PNG drawings are allowed.'), false);
+    }
+  }
+});
+
+export const uploadDrawings = uploadDrawingFiles.array('drawings', 5);

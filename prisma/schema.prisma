@@ -105,6 +105,7 @@ model ContactSubmission {
   phone     String?
   projectType String?
   message   String
+  attachments Json    @default("[]") // [{ url, name }] uploaded drawings
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }

@@ -1,5 +1,6 @@
 // backend-api/src/services/contactService.js
 import prisma from '../models/prisma.js';
+import { httpError } from '../middleware/errorHandler.js';
 
 export const getAllContactSubmissions = async (filter = {}) => {
   const { isRead } = filter;
@@ -18,8 +19,17 @@ export const getContactSubmissionById = async (id) => {
   return submission;
 };
 
-export const createContactSubmission = async (data) => {
-  const submission = await prisma.contactSubmission.create({ data });
+export const createContactSubmission = async (data, files = []) => {
+  const { fullName, email, phone, projectType, message } = data;
+  if (!fullName?.trim() || !email?.trim() || !message?.trim()) {
+    throw httpError(400, 'fullName, email and message are required');
+  }
+  const submission = await prisma.contactSubmission.create({
+    data: {
+      fullName, email, phone, projectType, message,
+      attachments: files.map((file) => ({ url: file.path, name: file.originalname })),
+    },
+  });
   // TODO: Add notification logic here (e.g., send email to admin)
   return submission;
 };

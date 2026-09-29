@@ -28,7 +28,7 @@ export const getContactSubmission = async (req, res, next) => {
 
 export const createContactSubmission = async (req, res, next) => {
   try {
-    const submission = await contactService.createContactSubmission(req.body);
+    const submission = await contactService.createContactSubmission(req.body, req.files);
     res.status(201).json(submission);
   } catch (error) {
     next(error);
