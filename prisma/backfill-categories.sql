@@ -26,7 +26,7 @@ INSERT INTO "Category" ("id", "slug", "name", "name_ar", "sortOrder")
 SELECT gen_random_uuid()::text,
        slug,
        initcap(replace(slug, '-', ' ')),
-       max("category_ar"),
+       NULLIF(max("category_ar"), ''),
        (row_number() OVER (ORDER BY min("createdAt")) - 1)::int
 FROM legacy
 GROUP BY slug
