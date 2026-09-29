@@ -51,6 +51,8 @@ test('POST rejects a bad slug with 400 and a duplicate slug with 409', async () 
   assert.equal(bad.status, 400);
   const dup = await json(server.base, '/categories', { method: 'POST', token, body: { slug: 'masterplan', name: 'Again' } });
   assert.equal(dup.status, 409);
+  assert.doesNotMatch(dup.body.message, /prisma/i);
+  assert.equal(dup.body.message, 'A record with that slug already exists');
 });
 
 test('PUT updates name_ar and sortOrder; unknown id is 404', async () => {
@@ -109,5 +111,7 @@ test('DELETE removes an unused category and refuses one still in use', async () 
 
   const refused = await json(server.base, `/categories/${used.id}`, { method: 'DELETE', token });
   assert.equal(refused.status, 409);
+  assert.doesNotMatch(refused.body.message, /prisma/i);
+  assert.equal(refused.body.message, 'Cannot delete while projects still reference it');
   assert.equal(await prisma.category.count({ where: { id: used.id } }), 1);
 });
