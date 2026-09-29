@@ -2,6 +2,7 @@
 import bcrypt from 'bcrypt'; // Changed from 'bcryptjs'
 import jwt from 'jsonwebtoken';
 import prisma from '../models/prisma.js';
+import { httpError } from '../middleware/errorHandler.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -21,11 +22,11 @@ export const registerUser = async (email, password, name, role) => {
 export const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) { // Check user existence first
-    throw new Error('Invalid credentials');
+    throw httpError(401, 'Invalid credentials');
   }
   // bcrypt.compare is async and returns a promise
   if (!(await bcrypt.compare(password, user.password))) { // <-- No change in function call
-    throw new Error('Invalid credentials');
+    throw httpError(401, 'Invalid credentials');
   }
   return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token: generateToken(user.id) };
 };
