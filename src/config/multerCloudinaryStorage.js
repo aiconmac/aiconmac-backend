@@ -1,4 +1,5 @@
 // backend-api/src/config/multerCloudinaryStorage.js
+import path from 'node:path';
 import { Readable } from 'stream';
 import cloudinary from './cloudinary.js';
 
@@ -15,8 +16,11 @@ class CloudinaryStorage {
     
     // Generate public_id
     const timestamp = Date.now();
-    const originalName = file.originalname.split('.')[0].replace(/\s+/g, '-');
-    const public_id = `${folder}/${originalName}-${timestamp}`;
+    const parsed = path.parse(file.originalname);
+    const originalName = (resource_type === 'raw' ? parsed.name : file.originalname.split('.')[0]).replace(/\s+/g, '-');
+    // raw assets keep no format, so the extension must live in the public_id to survive in the URL
+    const extension = resource_type === 'raw' ? parsed.ext.toLowerCase() : '';
+    const public_id = `${folder}/${originalName}-${timestamp}${extension}`;
 
     // Create upload stream
     const uploadOptions = {
