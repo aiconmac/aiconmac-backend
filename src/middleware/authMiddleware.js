@@ -45,3 +45,19 @@ export const authorizeRoles = (...roles) => {
     }
   };
 };
+
+export const optionalAuth = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer')) {
+    try {
+      const decoded = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+      req.user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, role: true },
+      });
+    } catch {
+      req.user = undefined;
+    }
+  }
+  next();
+};

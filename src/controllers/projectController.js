@@ -3,9 +3,10 @@ import * as projectService from '../services/projectService.js';
 
 export const getProjects = async (req, res, next) => {
   try {
+    const requested = req.query.isPublished ? (req.query.isPublished === 'true') : undefined;
     const filter = {
       category: req.query.category,
-      isPublished: req.query.isPublished ? (req.query.isPublished === 'true') : undefined,
+      isPublished: req.user ? requested : true,
     };
     const projects = await projectService.getAllProjects(filter);
     res.status(200).json(projects);
@@ -17,7 +18,7 @@ export const getProjects = async (req, res, next) => {
 export const getProject = async (req, res, next) => {
   try {
     const project = await projectService.getProjectById(req.params.id);
-    if (!project) {
+    if (!project || (!project.isPublished && !req.user)) {
       res.status(404);
       throw new Error('Project not found');
     }
