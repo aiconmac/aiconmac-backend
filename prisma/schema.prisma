@@ -32,7 +32,12 @@ model Project {
   title       String
   description String
   badge       String    // e.g., Residential, Commercial, Cultural
-  category    String    // e.g., architectural, industrial, masterplan (for filtering)
+  category    String?   // legacy free text; replaced by categoryId, dropped in the next schema change
+
+  categoryId  String?
+  scale       String?
+  leadTimeDays Int?
+  clientName  String?
 
   category_ar String?
   category_ru String?
@@ -62,6 +67,15 @@ model Image {
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade) // Cascade delete
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// Category list owned by the backend; drives Work filters and the Contact form
+model Category {
+  id        String  @id @default(uuid())
+  slug      String  @unique
+  name      String
+  name_ar   String?
+  sortOrder Int     @default(0)
 }
 
 // Testimonial Model
