@@ -17,7 +17,7 @@ class CloudinaryStorage {
     // Generate public_id
     const timestamp = Date.now();
     const parsed = path.parse(file.originalname);
-    const originalName = (resource_type === 'raw' ? parsed.name : file.originalname.split('.')[0]).replace(/\s+/g, '-');
+    const originalName = (resource_type === 'raw' ? parsed.name : file.originalname.split('.')[0]).replace(/[^A-Za-z0-9._-]+/g, '-');
     // raw assets keep no format, so the extension must live in the public_id to survive in the URL
     const extension = resource_type === 'raw' ? parsed.ext.toLowerCase() : '';
     const public_id = `${folder}/${originalName}-${timestamp}${extension}`;

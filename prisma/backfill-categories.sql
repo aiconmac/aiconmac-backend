@@ -37,3 +37,5 @@ SET "categoryId" = c."id"
 FROM "Category" c
 WHERE p."categoryId" IS NULL
   AND c."slug" = regexp_replace(lower(trim(p."category")), '[^a-z0-9]+', '-', 'g');
+
+ALTER TABLE "ContactSubmission" ADD COLUMN IF NOT EXISTS "attachments" JSONB NOT NULL DEFAULT '[]';
