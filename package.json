@@ -15,7 +15,9 @@
     "db:init": "npm run prisma:push && npm run prisma:generate",
     "db:test": "node scripts/init-db.js",
     "create-admin": "node scripts/create-admin.js",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "test": "node --env-file=.env.test --test --test-concurrency=1",
+    "test:db": "node --env-file=.env.test node_modules/prisma/build/index.js db push --force-reset --accept-data-loss"
   },
   "keywords": [],
   "author": "",
