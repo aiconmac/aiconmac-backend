@@ -2,6 +2,7 @@
 import prisma from '../models/prisma.js';
 import cloudinary from '../config/cloudinary.js';
 import { httpError } from '../middleware/errorHandler.js';
+import { triggerDeploy } from './deployHookService.js';
 
 const projectInclude = {
   images: { orderBy: { order: 'asc' } },
@@ -60,7 +61,7 @@ export const createProject = async (projectData, imageFiles = []) => {
 
   if (!categoryId) throw httpError(400, 'categoryId is required');
 
-  return prisma.project.create({
+  const project = await prisma.project.create({
     data: {
       title, title_ar, title_ru,
       description, description_ar, description_ru,
@@ -77,6 +78,8 @@ export const createProject = async (projectData, imageFiles = []) => {
     },
     include: projectInclude,
   });
+  if (project.isPublished) await triggerDeploy();
+  return project;
 };
 
 export const updateProject = async (id, projectData, imageFiles = []) => {
@@ -88,14 +91,15 @@ export const updateProject = async (id, projectData, imageFiles = []) => {
     isPublished, isPinned, sortOrder, existingImageIds = [],
   } = projectData;
 
-  const imagesToDelete = await prisma.image.findMany({
+  const before = await prisma.project.findUniqueOrThrow({ where: { id }, select: { isPublished: true } });
+  const imagesToDelete =await prisma.image.findMany({
     where: { projectId: id, id: { notIn: existingImageIds } },
   });
   for (const img of imagesToDelete) {
     if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
   }
 
-  return prisma.project.update({
+  const project = await prisma.project.update({
     where: { id },
     data: {
       title, title_ar, title_ru,
@@ -116,6 +120,8 @@ export const updateProject = async (id, projectData, imageFiles = []) => {
     },
     include: projectInclude,
   });
+  if (before.isPublished || project.isPublished) await triggerDeploy();
+  return project;
 };
 
 export const deleteProject = async (id) => {
@@ -127,5 +133,6 @@ export const deleteProject = async (id) => {
   }
 
   await prisma.project.delete({ where: { id } });
+  if (project.isPublished) await triggerDeploy();
   return { message: 'Project deleted successfully' };
 };
