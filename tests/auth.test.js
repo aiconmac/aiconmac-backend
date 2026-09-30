@@ -2,7 +2,7 @@ import { test, before, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import bcrypt from 'bcrypt';
 import prisma from '../src/models/prisma.js';
-import { startServer, resetDb, json } from './helpers.js';
+import { startServer, resetDb, adminToken, json } from './helpers.js';
 
 let server;
 before(async () => { server = await startServer(); });
@@ -32,4 +32,15 @@ test('correct credentials log in', async () => {
   const { status, body } = await login('user@test.local', 'secret123');
   assert.equal(status, 200);
   assert.ok(body.token);
+});
+
+test('register rejects passwords shorter than 12 characters', async () => {
+  const token = await adminToken();
+  const register = (password) => json(server.base, '/auth/register', {
+    method: 'POST', token, body: { email: `new-${password.length}@test.local`, password },
+  });
+  const short = await register('elevenchars');
+  assert.equal(short.status, 400);
+  assert.equal(short.body.message, 'Password must be at least 12 characters');
+  assert.equal((await register('twelve-chars')).status, 201);
 });

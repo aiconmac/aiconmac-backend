@@ -11,6 +11,9 @@ const generateToken = (id) => {
 };
 
 export const registerUser = async (email, password, name, role) => {
+  if (typeof password !== 'string' || password.length < 12) {
+    throw httpError(400, 'Password must be at least 12 characters');
+  }
   // bcrypt.hash is async and returns a promise
   const hashedPassword = await bcrypt.hash(password, 10); // <-- No change in function call
   const user = await prisma.user.create({
