@@ -36,3 +36,13 @@ test('service ignores id and isRead on create', async () => {
   assert.equal(submission.isRead, false);
   assert.equal(submission.fullName, fields.fullName);
 });
+
+test('service rejects a submission without an email', async () => {
+  await assert.rejects(careerService.createCareerSubmission({ ...fields, email: '' }), { status: 400 });
+  assert.equal(await prisma.careerSubmission.count(), 0);
+});
+
+test('POST /careers without required fields returns 400', async () => {
+  const { status } = await json(server.base, '/careers', { method: 'POST', body: {} });
+  assert.equal(status, 400);
+});

@@ -1,6 +1,7 @@
 // backend-api/src/services/careerService.js
 import prisma from '../models/prisma.js';
 import cloudinary from '../config/cloudinary.js';
+import { httpError } from '../middleware/errorHandler.js';
 
 export const getAllCareerSubmissions = async (filter = {}) => {
   const { isRead } = filter;
@@ -21,6 +22,9 @@ export const getCareerSubmissionById = async (id) => {
 
 export const createCareerSubmission = async (data, resumeFile) => {
   const { fullName, email, phone, message } = data;
+  if (!fullName?.trim() || !email?.trim()) {
+    throw httpError(400, 'fullName and email are required');
+  }
   let resumeUrl = null;
   let publicId = null;
 
