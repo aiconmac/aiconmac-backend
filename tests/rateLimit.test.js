@@ -12,12 +12,17 @@ before(async () => {
 });
 after(() => server.close());
 
-const post = (path, body, ip) => fetch(server.base + path, {
+const post = (path, body, ip, cfClient) => fetch(server.base + path, {
   method: 'POST',
-  headers: { 'content-type': 'application/json', ...(ip && { 'x-forwarded-for': ip }) },
+  headers: {
+    'content-type': 'application/json',
+    ...(ip && { 'x-forwarded-for': ip }),
+    ...(cfClient && { 'cf-connecting-ip': cfClient }),
+  },
   body: JSON.stringify(body),
 });
-const login = (password, ip) => post('/auth/login', { email: 'user@test.local', password }, ip);
+const login = (password, ip, cfClient) => post('/auth/login', { email: 'user@test.local', password }, ip, cfClient);
+const CLOUDFLARE_EDGE = '162.158.10.20';
 
 test('successful logins do not use up the login budget', async () => {
   for (let i = 0; i < 12; i++) assert.equal((await login('secret123')).status, 200);
@@ -32,6 +37,16 @@ test('login is throttled after 10 failures, even with the right password', async
 
 test('another client IP behind the proxy keeps its own login budget', async () => {
   assert.equal((await login('secret123', '203.0.113.9')).status, 200);
+});
+
+test('CF-Connecting-IP from outside Cloudflare does not buy a fresh budget', async () => {
+  assert.equal((await login('secret123', undefined, '198.51.100.7')).status, 429);
+});
+
+test('behind Cloudflare, each CF-Connecting-IP has its own budget', async () => {
+  for (let i = 0; i < 10; i++) assert.equal((await login('wrong', CLOUDFLARE_EDGE, '198.51.100.20')).status, 401);
+  assert.equal((await login('secret123', CLOUDFLARE_EDGE, '198.51.100.20')).status, 429);
+  assert.equal((await login('secret123', CLOUDFLARE_EDGE, '198.51.100.21')).status, 200);
 });
 
 for (const path of ['/contact', '/testimonials', '/careers']) {
