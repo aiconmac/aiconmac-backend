@@ -43,7 +43,8 @@ export const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode);
   res.json({
-    message: prismaMessage(err, req),
-    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
+    // Unexpected errors carry Prisma query shapes and internals; only deliberate messages reach the caller.
+    message: statusCode >= 500 && !err.status ? 'Internal server error' : prismaMessage(err, req),
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 };
