@@ -28,7 +28,11 @@ export const getTestimonial = async (req, res, next) => {
 
 export const createTestimonial = async (req, res, next) => {
   try {
-    const testimonial = await testimonialService.createTestimonial(req.body);
+    const isStaff = ['ADMIN', 'EDITOR'].includes(req.user?.role);
+    const testimonial = await testimonialService.createTestimonial({
+      ...req.body,
+      isApproved: isStaff ? req.body.isApproved : false,
+    });
     res.status(201).json(testimonial);
   } catch (error) {
     next(error);
