@@ -9,5 +9,6 @@ after(() => server.close());
 test('GET /api/health responds 200', async () => {
   const res = await fetch(`${server.base}/health`);
   assert.equal(res.status, 200);
+  assert.equal(res.headers.get('x-powered-by'), null);
   assert.deepEqual(await res.json(), { message: 'API is healthy!' });
 });

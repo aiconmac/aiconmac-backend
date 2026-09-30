@@ -8,6 +8,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 dotenv.config(); // Load environment variables from .env
 
 const app = express();
+app.disable('x-powered-by');
 
 // Railway's edge proxy is the one hop in front of us; rate limits key on req.ip, which must be the client, not the proxy.
 app.set('trust proxy', 1);
