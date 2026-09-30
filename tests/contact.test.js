@@ -2,7 +2,7 @@ import { test, before, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import prisma from '../src/models/prisma.js';
 import * as contactService from '../src/services/contactService.js';
-import { startServer, resetDb, json } from './helpers.js';
+import { startServer, resetDb, adminToken, json } from './helpers.js';
 
 let server;
 before(async () => { server = await startServer(); });
@@ -49,6 +49,21 @@ test('service stores uploaded drawings as {url, name}', async () => {
     { url: 'https://res.cloudinary.test/raw/plan.dwg', name: 'plan.dwg' },
     { url: 'https://res.cloudinary.test/raw/site.pdf', name: 'site.pdf' },
   ]);
+});
+
+test('PUT /contact/:id only changes isRead', async () => {
+  const drawing = { url: 'https://res.cloudinary.test/raw/plan.dwg', name: 'plan.dwg' };
+  const { id } = await contactService.createContactSubmission(fields, [{ path: drawing.url, originalname: drawing.name }]);
+  const { status } = await json(server.base, `/contact/${id}`, {
+    method: 'PUT',
+    token: await adminToken(),
+    body: { isRead: true, email: 'evil@x.y', attachments: [{ url: 'https://evil' }] },
+  });
+  assert.equal(status, 200);
+  const stored = await prisma.contactSubmission.findUnique({ where: { id } });
+  assert.equal(stored.isRead, true);
+  assert.equal(stored.email, fields.email);
+  assert.deepEqual(stored.attachments, [drawing]);
 });
 
 test('service requires fullName, email and message', async () => {

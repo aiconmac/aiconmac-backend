@@ -20,6 +20,7 @@ export const getCareerSubmissionById = async (id) => {
 };
 
 export const createCareerSubmission = async (data, resumeFile) => {
+  const { fullName, email, phone, message } = data;
   let resumeUrl = null;
   let publicId = null;
 
@@ -31,7 +32,7 @@ export const createCareerSubmission = async (data, resumeFile) => {
 
   const submission = await prisma.careerSubmission.create({
     data: {
-      ...data,
+      fullName, email, phone, message,
       resumeUrl,
       publicId,
     },
@@ -40,8 +41,8 @@ export const createCareerSubmission = async (data, resumeFile) => {
   return submission;
 };
 
-export const updateCareerSubmission = async (id, data) => {
-  const submission = await prisma.careerSubmission.update({ where: { id }, data });
+export const updateCareerSubmission = async (id, { isRead }) => {
+  const submission = await prisma.careerSubmission.update({ where: { id }, data: { isRead } });
   return submission;
 };
 

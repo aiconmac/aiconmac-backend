@@ -34,8 +34,8 @@ export const createContactSubmission = async (data, files = []) => {
   return submission;
 };
 
-export const updateContactSubmission = async (id, data) => {
-  const submission = await prisma.contactSubmission.update({ where: { id }, data });
+export const updateContactSubmission = async (id, { isRead }) => {
+  const submission = await prisma.contactSubmission.update({ where: { id }, data: { isRead } });
   return submission;
 };
 
