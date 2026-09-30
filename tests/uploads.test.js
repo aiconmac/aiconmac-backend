@@ -56,7 +56,7 @@ test('POST /contact rejects more than 5 drawings', async () => {
 
 test('POST /careers rejects a resume that is not a PDF', async () => {
   const res = await post('/careers', 'resume', [{ name: 'cv.html', size: 64, type: 'text/html' }]);
-  assert.notEqual(res.status, 201);
+  assert.equal(res.status, 400);
   assert.match((await res.json()).message, /Only PDF/);
   assert.equal(await prisma.careerSubmission.count(), 0);
 });

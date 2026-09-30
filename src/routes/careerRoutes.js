@@ -7,8 +7,13 @@ import { uploadResume } from '../middleware/uploadMiddleware.js'; // For resume 
 
 const router = express.Router();
 
+const resume = (req, res, next) => uploadResume(req, res, (err) => {
+  if (err) res.status(400);
+  next(err);
+});
+
 router.route('/')
-  .post(submissionLimiter(), uploadResume, careerController.createCareerSubmission) // Publicly accessible for submission with resume
+  .post(submissionLimiter(), resume, careerController.createCareerSubmission) // Publicly accessible for submission with resume
   .get(protect, authorizeRoles('ADMIN', 'EDITOR', 'VIEWER'), careerController.getCareerSubmissions); // Admin access
 
 router.route('/:id')
