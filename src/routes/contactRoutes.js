@@ -2,6 +2,7 @@
 import express from 'express';
 import * as contactController from '../controllers/contactController.js';
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
+import { submissionLimiter } from '../middleware/rateLimit.js';
 
 import { uploadDrawings } from '../middleware/uploadMiddleware.js';
 
@@ -13,7 +14,7 @@ const drawings = (req, res, next) => uploadDrawings(req, res, (err) => {
 });
 
 router.route('/')
-  .post(drawings, contactController.createContactSubmission) // Publicly accessible for submission, optional drawings
+  .post(submissionLimiter(), drawings, contactController.createContactSubmission) // Publicly accessible for submission, optional drawings
   .get(protect, authorizeRoles('ADMIN', 'EDITOR', 'VIEWER'), contactController.getContactSubmissions); // Admin access
 
 router.route('/:id')

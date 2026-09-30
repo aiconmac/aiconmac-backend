@@ -9,6 +9,9 @@ dotenv.config(); // Load environment variables from .env
 
 const app = express();
 
+// Railway's edge proxy is the one hop in front of us; rate limits key on req.ip, which must be the client, not the proxy.
+app.set('trust proxy', 1);
+
 // CORS configuration
 const allowedOrigins = [
   process.env.CLIENT_MAIN_URL,
