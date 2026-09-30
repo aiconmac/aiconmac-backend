@@ -1,3 +1,4 @@
+import './assertTestDb.js';
 import { createServer } from 'node:http';
 import jwt from 'jsonwebtoken';
 import app from '../src/app.js';
