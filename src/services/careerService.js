@@ -25,6 +25,9 @@ export const createCareerSubmission = async (data, resumeFile) => {
   if (!fullName?.trim() || !email?.trim()) {
     throw httpError(400, 'fullName and email are required');
   }
+  const tooLong = Object.entries({ fullName: 200, email: 254, phone: 200, message: 5000 })
+    .find(([field, max]) => data[field]?.length > max);
+  if (tooLong) throw httpError(400, `${tooLong[0]} must be at most ${tooLong[1]} characters`);
   let resumeUrl = null;
   let publicId = null;
 

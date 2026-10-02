@@ -24,6 +24,9 @@ export const createContactSubmission = async (data, files = []) => {
   if (!fullName?.trim() || !email?.trim() || !message?.trim()) {
     throw httpError(400, 'fullName, email and message are required');
   }
+  const tooLong = Object.entries({ fullName: 200, email: 254, phone: 200, projectType: 200, message: 5000 })
+    .find(([field, max]) => data[field]?.length > max);
+  if (tooLong) throw httpError(400, `${tooLong[0]} must be at most ${tooLong[1]} characters`);
   const submission = await prisma.contactSubmission.create({
     data: {
       fullName, email, phone, projectType, message,

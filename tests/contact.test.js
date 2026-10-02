@@ -69,3 +69,10 @@ test('PUT /contact/:id only changes isRead', async () => {
 test('service requires fullName, email and message', async () => {
   await assert.rejects(contactService.createContactSubmission({ email: 'a@b.c' }), { status: 400 });
 });
+
+test('POST /contact rejects a message over 5000 characters', async () => {
+  const { status, body } = await json(server.base, '/contact', { method: 'POST', body: { ...fields, message: 'x'.repeat(6000) } });
+  assert.equal(status, 400);
+  assert.equal(body.message, 'message must be at most 5000 characters');
+  assert.equal(await prisma.contactSubmission.count(), 0);
+});

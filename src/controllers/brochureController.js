@@ -10,6 +10,12 @@ export const createBrochureRequest = async (req, res, next) => {
             throw new Error('Email is required');
         }
 
+        // The regex backtracks quadratically on long input, so bound it first.
+        if (typeof email !== 'string' || email.length > 254) {
+            res.status(400);
+            throw new Error('Invalid email address');
+        }
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             res.status(400);

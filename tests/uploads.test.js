@@ -60,3 +60,22 @@ test('POST /careers rejects a resume that is not a PDF', async () => {
   assert.match((await res.json()).message, /Only PDF/);
   assert.equal(await prisma.careerSubmission.count(), 0);
 });
+
+const postForm = (path, form, ip) => fetch(server.base + path, { method: 'POST', body: form, headers: { 'x-forwarded-for': ip } });
+
+test('POST /contact rejects a text field over 16KB', async () => {
+  const form = new FormData();
+  for (const [key, value] of Object.entries({ ...fields, notes: 'x'.repeat(16 * 1024 + 1) })) form.append(key, value);
+  const res = await postForm('/contact', form, '203.0.113.31');
+  assert.equal(res.status, 400);
+  assert.equal(await prisma.contactSubmission.count(), 0);
+});
+
+test('POST /contact rejects more than 20 fields', async () => {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, value);
+  for (let i = [...form.keys()].length; i < 21; i++) form.append(`extra${i}`, 'x');
+  const res = await postForm('/contact', form, '203.0.113.32');
+  assert.equal(res.status, 400);
+  assert.equal(await prisma.contactSubmission.count(), 0);
+});

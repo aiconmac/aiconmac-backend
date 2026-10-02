@@ -18,7 +18,7 @@ const resumeStorage = new CloudinaryStorage({
 // Configure Multer for images
 const uploadImages = multer({
   storage: imageStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024, fieldSize: 16 * 1024, fields: 20 }, // 10MB
   fileFilter: (req, file, cb) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (allowedMimeTypes.includes(file.mimetype)) {
@@ -32,7 +32,7 @@ const uploadImages = multer({
 // Configure Multer for resumes
 const uploadResumeFile = multer({
   storage: resumeStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024, fieldSize: 16 * 1024, fields: 20 }, // 5MB
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
@@ -56,7 +56,7 @@ const drawingStorage = new CloudinaryStorage({
 
 const uploadDrawingFiles = multer({
   storage: drawingStorage,
-  limits: { fileSize: 10 * 1024 * 1024, files: 5 }, // 10MB each, 5 files
+  limits: { fileSize: 10 * 1024 * 1024, files: 5, fieldSize: 16 * 1024, fields: 20 }, // 10MB each, 5 files
   fileFilter: (req, file, cb) => {
     if (/\.(pdf|dwg|dxf|jpe?g|png)$/i.test(file.originalname)) {
       cb(null, true);

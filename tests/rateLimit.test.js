@@ -49,7 +49,7 @@ test('behind Cloudflare, each CF-Connecting-IP has its own budget', async () => 
   assert.equal((await login('secret123', CLOUDFLARE_EDGE, '198.51.100.21')).status, 200);
 });
 
-for (const path of ['/contact', '/testimonials', '/careers']) {
+for (const path of ['/contact', '/testimonials', '/careers', '/brochure-request']) {
   test(`POST ${path} is throttled after 5 submissions`, async () => {
     for (let i = 0; i < 5; i++) assert.notEqual((await post(path, {})).status, 429);
     const res = await post(path, {});
@@ -57,3 +57,11 @@ for (const path of ['/contact', '/testimonials', '/careers']) {
     assert.equal((await res.json()).message, 'Too many submissions, try again later');
   });
 }
+
+test('POST /brochure-request rejects a pathological email quickly', async () => {
+  const started = performance.now();
+  const res = await post('/brochure-request', { email: `a@${'.'.repeat(90000)} ` }, '203.0.113.40');
+  const elapsed = performance.now() - started;
+  assert.equal(res.status, 400);
+  assert.ok(elapsed < 50, `took ${elapsed}ms`);
+});
