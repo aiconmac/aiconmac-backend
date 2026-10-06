@@ -18,7 +18,7 @@ const resumeStorage = new CloudinaryStorage({
 // Configure Multer for images
 const uploadImages = multer({
   storage: imageStorage,
-  limits: { fileSize: 10 * 1024 * 1024, fieldSize: 16 * 1024, fields: 20 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024, fieldSize: 16 * 1024, fields: 100 }, // 10MB; dashboard sends 17 text fields + one existingImageIds[] per kept image
   fileFilter: (req, file, cb) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (allowedMimeTypes.includes(file.mimetype)) {
